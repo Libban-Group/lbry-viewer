@@ -1,0 +1,27 @@
+<p class="title"><%= result.metadata.title %></p>
+<div class="stream"><%- include('./types/' + result.metadata.stream_type, {result}) %></div>
+<div class="misc">
+    <p>Released: <%= new Date(result.timestamp*1000).toISOString().split('T')[0] %> %></p>
+    <a href="<%= process.env.LBRY_STREAMING_API + result.sd_hash %>" download="<%= result.stream_name %>">Download</a>
+</div>
+<hr>
+<div class="body">
+    <p class="section">URL</p>
+    <a href="/?q=<%= result.claim_name + ':' + result.claim_id %>" class="text"><%= "lbry://" + result.claim_name + '#' + result.claim_id %></a>
+    <% if (result.metadata.languages) { %>
+        <p class="section">Languages</p>
+        <p class="text"><%= result.metadata.languages.join(', ') %></p>
+    <% } %>
+    <% if (result.metadata.tags) { %>
+        <p class="section">Tags</p>
+        <p class="text"><%= result.metadata.tags.join(', ') %></p>
+    <% } %>
+    <% if (result.metadata.license) { %>
+        <p class="section">License</p>
+        <p class="text"><%= result.metadata.license %></p>
+    <% } %>
+    <% if (result.metadata.description) { %>
+        <p class="section">Description</p>
+        <p class="text"><%= result.metadata.description %></p>
+    <% } %>
+</div>

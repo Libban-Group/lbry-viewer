@@ -1,0 +1,7 @@
+<link rel="stylesheet" href="/css/plyr.css" />
+<video poster="<%= result.metadata.thumbnail.url %>" id="player" width="100%" controls src="<%= process.env.LBRY_STREAMING_API + result.sd_hash %>"></video>
+
+<script src="/js/plyr.js"></script>
+<script>
+  const player = new Plyr('#player');
+</script>
