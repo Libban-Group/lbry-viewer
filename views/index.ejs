@@ -21,7 +21,7 @@
             <%- include('home') %>
         <% } %>
     <% } else if (data.message) { %>
-        <%= JSON.stringify(data) %>
+        <p><%= JSON.stringify(data) %></p>
         <%- include('home') %>
     <% } else { %>
         <%- include('home') %>
