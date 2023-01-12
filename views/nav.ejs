@@ -1,0 +1,4 @@
+<div class="nav">
+    <a href="/?s=<%= query %>&p=<%= data.page <= 1 ? data.page : data.page-1 %>">Back</a>
+    <a href="/?s=<%= query %>&p=<%= data.page >= data.total_pages ? data.page : data.page+1 %>">Next</a>
+</div>

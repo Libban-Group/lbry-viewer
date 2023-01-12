@@ -1,0 +1,21 @@
+<div class="claims">
+    <p>Found <%= data.total_items %> claims</p>
+    <p>Page <%= data.page %> of <%= data.total_pages %></p>
+    <%- include('nav.ejs') %>
+    <% data.items.forEach(item => { %>
+        <a href="/?q=<%= encodeURIComponent(item.name + ':' + item.claim_id) %>" class="claim">
+            <div class="left">
+                <p class="title"><%= item.value.title %></p>
+                <p class="channel"><%= item.signing_channel ? item.signing_channel.name : 'Anonymous' %></p>
+                <br/>
+                <p class="tags"><%= item.value.tags ? item.value.tags.join(', ') : '' %></p>
+            </div>
+            <div class="img">
+                <img src="<%= item.value.thumbnail && item.value.thumbnail.url ? item.value.thumbnail.url : '#' %>" alt="">
+            </div>
+        </a>
+    <% }) %>
+    <%- include('nav.ejs') %>
+    <p>Page <%= data.page %> of <%= data.total_pages %></p>
+    <p>Found <%= data.total_items %> claims</p>
+</div>

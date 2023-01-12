@@ -11,19 +11,16 @@
 </head>
 <body>
     <%- include('header') %>
-    <% if (data.result) { %>
-        <% if (!data.result.error) { %>
-            <div class="card">
-                <%- include('stream', {result: data.result}) %>
-            </div>
+    <% if (!data.error) { %>
+        <% if (data.items) { %>
+            <%- include('search', {result: data}) %>
         <% } else { %>
-            <p style="text-align: center; padding-top: 20px">Claim does not exists</p>
-            <%- include('home') %>
+            <div class="card">
+                <%- include('stream', {result: data}) %>
+            </div>
         <% } %>
-    <% } else if (data.message) { %>
-        <p style="text-align: center; padding-top: 20px"><%= JSON.stringify(data) %></p>
-        <%- include('home') %>
     <% } else { %>
+        <p style="text-align: center; padding-top: 20px"><%= data.error %></p>
         <%- include('home') %>
     <% } %>
 </body>

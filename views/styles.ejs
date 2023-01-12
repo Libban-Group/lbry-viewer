@@ -20,6 +20,66 @@ hr {
     border: 1px solid #c46222
 }
 
+.claims {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.claims .nav {
+    display: flex;
+    width: 80%;
+    max-width: 500px;
+    justify-content: space-between;
+}
+
+.claims .claim {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    max-width: 500px;
+    margin: 20px;
+    padding: 20px 10px;
+    border-radius: 10px;
+    background-color: rgba(255,255,255, 0.1);
+    color: #f9d75e;
+    text-decoration: none;
+}
+
+.claims .claim:hover {
+    background-color: rgba(255,255,255, 0.2);
+}
+
+.claims .claim:active {
+    background-color: rgba(255,255,255, 0.3);
+}
+
+.claims .claim .left {
+    max-width: 50%;
+}
+
+.claims .claim .title {
+    font-weight: bold;
+}
+
+.claims .claim .tags {
+    font-size: 0.7rem;
+}
+
+.claims .claim .img {
+    display: flex;
+    align-items: center;
+    height: 100px;
+    max-width: 200px;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.claims .claim .img img {
+    height: 100%;
+}
+
 .wrapper.card {
     text-align: center;
 }
