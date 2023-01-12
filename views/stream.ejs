@@ -12,6 +12,8 @@
         <p class="section">Languages</p>
         <p class="text"><%= result.metadata.languages.join(', ') %></p>
     <% } %>
+    <p class="section">Blob Peers</p>
+    <a href="https://stats.lbry.pigg.es/blob-peers?q=<%= result.claim_name + ':' + result.claim_id %>" class="text">Check Blob Peers</a>
     <% if (result.metadata.tags) { %>
         <p class="section">Tags</p>
         <p class="text"><%= result.metadata.tags.join(', ') %></p>

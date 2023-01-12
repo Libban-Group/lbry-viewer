@@ -17,7 +17,6 @@ app.set('view engine', 'ejs');
 
 app.get('/', async (req,res)=>{
     if (req.query.q) {
-        console.log(req.query.q);
         const data = await api("get", {uri: req.query.q});
         let text;
         if (data && data.mime_type && data.mime_type.includes('text')) {
