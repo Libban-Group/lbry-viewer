@@ -32,7 +32,7 @@ app.get('/', async (req,res)=>{
 
         return res.render('index.ejs', {data, query: req.query.s});
     }
-    return res.render('index.ejs');
+    return res.render('index.ejs', {data: null});
 
     // res.render('index', {data, text});
 })

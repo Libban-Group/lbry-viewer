@@ -11,16 +11,20 @@
 </head>
 <body>
     <%- include('header') %>
-    <% if (!data.error) { %>
-        <% if (data.items) { %>
-            <%- include('search', {result: data}) %>
+    <% if (data) { %>
+        <% if (!data.error) { %>
+            <% if (data.items) { %>
+                <%- include('search', {result: data}) %>
+            <% } else { %>
+                <div class="card">
+                    <%- include('stream', {result: data}) %>
+                </div>
+            <% } %>
         <% } else { %>
-            <div class="card">
-                <%- include('stream', {result: data}) %>
-            </div>
+            <p style="text-align: center; padding-top: 20px"><%= data.error %></p>
+            <%- include('home') %>
         <% } %>
     <% } else { %>
-        <p style="text-align: center; padding-top: 20px"><%= data.error %></p>
         <%- include('home') %>
     <% } %>
 </body>
