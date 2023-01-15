@@ -25,7 +25,7 @@ app.get('/', async (req,res)=>{
         return res.render('index.ejs', {data, text});
     }
     if (req.query.s) {
-        const data = await api("claim_search", {text: req.query.s, page: parseInt(req.query.p || '1')});
+        const data = await api("claim_search", {text: req.query.s.replaceAll('+', '\+').replaceAll(' ', '+'), page: parseInt(req.query.p || '1')});
 
         // console.log(data);
 
