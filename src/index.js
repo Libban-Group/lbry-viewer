@@ -17,5 +17,5 @@ app.after((ctx) => {
     return ctx;
 });
 
-app.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT);
 console.log("LBRY Viewer started");
