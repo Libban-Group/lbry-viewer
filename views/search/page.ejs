@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../head.ejs') %>
+</head>
+<body>
+    <%- include('../header.ejs') %>
+    <div class="wrapper">
+        <%- include('./searchInfo.ejs') %>
+        <%- include('../feed.ejs', {type: 'search', info}) %>
+    </div>
+</body>
+</html>

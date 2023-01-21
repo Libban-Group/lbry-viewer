@@ -1,0 +1,158 @@
+<script>
+    (async ()=>{
+        handlePageButtons();
+        const channel_claim = await fetchChannel();
+        console.log(channel_claim);
+        handleBanner(channel_claim);
+        handleFollowButton(channel_claim);
+        handleClaims(channel_claim);
+        handleAbout(channel_claim);
+    })();
+
+    async function fetchChannel() {
+        let claim_name = new URL(window.location).pathname;
+        claim_name = claim_name.replace('/', ''); // Remove first /
+
+        const resp  = await fetch('/$/api/resolve?urls=' + JSON.stringify([claim_name]));
+        const json = await resp.json();
+
+        if (json.error) console.log(json);
+
+        return json.claims[0];
+    }
+
+    function handleBanner(claim) {
+        // Set cover image
+        document.querySelector('#cover').src = handleImage(claim.value.cover);
+
+        // Set thumbnail image
+        document.querySelector('#thumbnail').src = handleImage(claim.value.thumbnail);
+
+        // Set channel title
+        document.querySelector('#title').innerText = claim.value.title || claim.name;
+
+        // Set channel name
+        if (claim.value.title) document.querySelector('#name').innerText = claim.name;
+
+        // Set channel claim number
+        document.querySelector('#claims').innerText = claim.meta.claims_in_channel + ' claim' + (claim.meta.claims_in_channel === 1 ? '' : 's');
+    }
+
+    async function handleClaims(claim) {
+        let params = {
+            channel_ids: [claim.claim_id],
+            order_by: ["release_time"],
+            page_size: 10
+        };
+
+        activateNavButtons(fetchChannelClaims, 'channel', params);
+
+        populateFeed(await fetchChannelClaims(params), document.querySelector('#channel'));
+    }
+
+    function handleAbout(claim) {
+        const about = document.querySelector('#channel-about');
+        if (claim.value.description) about.appendChild(addMeta('Description', claim.value.description));
+        about.appendChild(addLink('URL', new URL(window.location).pathname, claim.permanent_url.replace('#', ':')));
+        about.appendChild(addMeta('Staked', claim.amount + ' LBC'));
+        if (claim.value.languages && claim.value.languages.length > 0) about.appendChild(addCategory('Languages', claim.value.languages, 'all_languages'));
+        if (claim.value.tags && claim.value.tags.length > 0) about.appendChild(addCategory('Tags', claim.value.tags, 'all_tags'));
+        if (claim.value.email) about.appendChild(addLink('Email', 'mailto:' + claim.value.email, claim.value.email));
+        if (claim.value.website_url) about.appendChild(addLink('Website', '//' + claim.value.website_url, claim.value.website_url));
+    }
+
+    function addLink(title, link, content="") {
+        const meta = document.createElement('div');
+        meta.classList.add('meta');
+        const name = document.createElement('span');
+        name.classList.add('title');
+        name.innerText = title;
+        const text = document.createElement('a');
+        text.classList.add('text');
+        text.innerText = content || link;
+        text.href = link;
+
+        meta.appendChild(name);
+        meta.appendChild(text);
+        return meta
+    }
+
+    function addMeta(title, content) {
+        const meta = document.createElement('div');
+        meta.classList.add('meta');
+        const name = document.createElement('span');
+        name.classList.add('title');
+        name.innerText = title;
+        const text = document.createElement('span');
+        text.classList.add('text');
+        text.innerText = content;
+
+        meta.appendChild(name);
+        meta.appendChild(text);
+        return meta
+    }
+
+    function addCategory(title, values, type) {
+        const meta = document.createElement('div');
+        meta.classList.add('meta');
+        const name = document.createElement('span');
+        name.classList.add('title');
+        name.innerText = title;
+        const list = document.createElement('div');
+        list.classList.add('cat');
+
+        values.forEach(value=>{
+            const item = document.createElement('a');
+            item.classList.add('item');
+            //item.classList.add(value);
+            item.innerText = value;
+            item.href = `/$/search?${type}=["${value}"]`
+
+            list.appendChild(item);
+    
+        })
+
+        meta.appendChild(name);
+        meta.appendChild(list);
+        return meta;
+    }
+
+    function handleFollowButton(channel_claim) {
+        // Follow button
+        const following = getLocalStorage('following') || [];
+
+        const follow = document.querySelector('#follow');
+        follow.innerText = following && following.includes(channel_claim.claim_id) ? "Following" : "Follow";
+        follow.addEventListener('click', (e)=>{ handleFollow(e, channel_claim.claim_id) }); // Handle mouse click
+        follow.addEventListener('mouseover', (e)=>{ handleHoverFollow(e, 'mouseover', channel_claim.claim_id) }) // Handle mouse over
+        follow.addEventListener('mouseout', (e)=>{ handleHoverFollow(e, 'mouseout', channel_claim.claim_id) }) // Handle mouse out
+    }
+
+    function handlePageButtons() {
+        // Set starting view
+        let url = new URL(document.location);
+        handleView(url.searchParams.get('view') || "claims", false);
+
+        document.querySelector('#claims-button').addEventListener('click', (e)=> { handleView('claims') });
+        document.querySelector('#about-button').addEventListener('click', (e)=> { handleView('about') });
+    }
+
+    function handleView(view, set=true) {
+        {
+            let url = new URL(document.location);
+            if (set) url.searchParams.set('view', view);
+            // Change url
+            history.pushState(null, '', url);
+
+            // Update bold
+            document.querySelector('#' + view + '-button').style.fontWeight = 'bold';
+            if (view !== 'claims') document.querySelector('#claims-button').style.fontWeight = 'initial';
+            if (view !== 'about') document.querySelector('#about-button').style.fontWeight = 'initial';
+
+            // Show correct view
+            document.querySelector('#channel-' + view).style.display = 'initial';
+            if (view !== 'claims') document.querySelector('#channel-claims').style.display = 'none';
+            if (view !== 'about') document.querySelector('#channel-about').style.display = 'none';
+        };
+    }
+</script>

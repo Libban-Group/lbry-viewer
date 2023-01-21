@@ -1,0 +1,230 @@
+<script>
+    (async ()=>{
+        const claim = await fetchClaim();
+        console.log(claim);
+        handleFile(claim);
+        handleChannelInfo(claim);
+        handleClaimInfo(claim);
+        handleMetadata(claim);
+        handleRelated(claim);
+    })();
+
+    async function fetchClaim() {
+        let claim_name = new URL(window.location).pathname;
+        claim_name = claim_name.replace('/', ''); // Remove first /
+
+        const resp  = await fetch('/$/api/get?uri=' + claim_name);
+        const json = await resp.json();
+
+        if (json.error) console.log(json);
+
+        return json;
+    }
+
+    async function handleFile(claim) {
+        const fileWrapper = document.querySelector('#file');
+
+        if (claim.metadata.stream_type === 'video' || claim.metadata.stream_type === 'audio') return createVideo(claim, fileWrapper);
+        if (claim.metadata.stream_type === 'image') return fileWrapper.appendChild(createImage(claim));
+        if (claim.metadata.stream_type === 'document') return fileWrapper.appendChild(await createDocument(claim));
+
+        // Stream type not supported
+        const unsupported = document.createElement('p');
+        unsupported.classList.add('hint');
+        unsupported.innerText = "Stream type unsupported: " + claim.metadata.stream_type;
+        return fileWrapper.appendChild(unsupported);
+    }
+
+    function createVideo(claim, fileWrapper) {
+        const video = document.createElement('video');
+        //video.controls = true;
+        video.classList.add('stream');
+        video.id = 'player';
+        video.src = "<%= info.LBRY_STREAMING_API %>" + handleLBRYLink(claim.sd_hash).replace('/', '');
+        video.poster = handleImage(claim.metadata.thumbnail);
+
+        const controls = [
+            'play-large', // The large play button in the center
+            'play', // Play/pause playback
+            'mute', // Toggle mute
+            'volume', // Volume control
+            'current-time', // The current time of playback
+            'progress', // The progress bar and scrubber for playback and buffering
+            'duration', // The full duration of the media
+            //'restart', // Restart playback
+            //'rewind', // Rewind by the seek time (default 10 seconds)
+            //'fast-forward', // Fast forward by the seek time (default 10 seconds)
+            //'captions', // Toggle captions
+            'settings', // Settings menu
+            //'pip', // Picture-in-picture (currently Safari only)
+            'airplay', // Airplay (currently Safari only)
+            'download', // Show a download button with a link to either the current source or a custom URL you specify in your options
+            'fullscreen' // Toggle fullscreen
+        ];
+
+        fileWrapper.appendChild(video);
+        const player = new Plyr('#player', {
+            iconUrl: "/$/public/img/plyr.svg",
+            loadSprite: false,
+            blankVideo: '/$/public/media/blank.mp4',
+            disableContextMenu: false,
+            controls: controls,
+            download: true
+        });
+
+        player.download = "<%= info.LBRY_STREAMING_API %>" + handleLBRYLink(claim.sd_hash).replace('/', '');
+        console.log(player.download);
+    }
+
+    async function createDocument(claim) {
+        if (claim.mime_type === 'application/pdf') {
+            const pdf = document.createElement('object');
+            pdf.classList.add('stream');
+            pdf.data = "<%= info.LBRY_STREAMING_API %>" + handleLBRYLink(claim.sd_hash).replace('/', '');
+            return pdf;
+        }
+
+        if (claim.mime_type === 'text/markdown') {
+            let text = await fetch("/$/api/fetch?stream=" + handleLBRYLink(claim.sd_hash).replace('/', ''));
+            text = await text.json();
+            return handleMarkdown(text.text);
+        }
+
+        // Document type is not supported
+        const unsupported = document.createElement('p');
+        unsupported.innerText = "Document type unsupported: " + claim.mime_type;
+        return unsupported;
+    }
+
+    function createImage(claim) {
+        const img = document.createElement('img');
+        //img.classList.add('stream');
+        img.classList.add('img');
+        img.src = "<%= info.LBRY_STREAMING_API %>" + handleLBRYLink(claim.sd_hash).replace('/', '');
+        return img;
+    }
+
+    function handleClaimInfo(claim) {
+        document.querySelector('#claim-title').innerText = claim.metadata.title || claim.claim_name;
+        document.querySelector('#claim-release').innerText = handleDate(claim.metadata.release_time);
+    }
+
+    async function handleChannelInfo(claim) {
+        // Handle if there was no signing_channel
+        if (!claim.channel_claim_id) return handleNoSigningChannel();
+
+        let channel_claim = await fetch('/$/api/search?claim_id=' + claim.channel_claim_id);
+        channel_claim = await channel_claim.json();
+        if (channel_claim.error) return console.log(channel_claim.error);
+        channel_claim = channel_claim.items[0];
+
+        console.log(channel_claim);
+
+
+        // Channel thumbnail
+        document.querySelector('#channel-thumbnail').src = handleImage(channel_claim.value.thumbnail);
+        document.querySelector('#channel-thumbnail-link').href = handleLBRYLink(channel_claim.canonical_url);
+
+        // Channel title
+        document.querySelector('#channel-title').innerText = channel_claim.value.title || channel_claim.name;
+        document.querySelector('#channel-title').href = handleLBRYLink(channel_claim.canonical_url);
+
+        // Channel name
+        document.querySelector('#channel-name').innerText = channel_claim.value.title ? channel_claim.name : '';
+
+
+
+        // Follow button
+        const following = getLocalStorage('following') || [];
+        const follow = document.createElement('button');
+        follow.classList.add('follow');
+        follow.innerText = following && following.includes(channel_claim.claim_id) ? "Following" : "Follow";
+        follow.addEventListener('click', (e)=>{ handleFollow(e, channel_claim.claim_id) }); // Handle mouse click
+        follow.addEventListener('mouseover', (e)=>{ handleHoverFollow(e, 'mouseover', channel_claim.claim_id) }) // Handle mouse over
+        follow.addEventListener('mouseout', (e)=>{ handleHoverFollow(e, 'mouseout', channel_claim.claim_id) }) // Handle mouse out
+        document.querySelector('#signing_channel').appendChild(follow);
+    }
+
+    function handleNoSigningChannel() {
+        document.querySelector('#channel-thumbnail').src = handleImage('');
+        document.querySelector('#channel-title').innerText = "Anonymous";
+    }
+
+    function handleMetadata(claim) {
+        const container = document.querySelector('#metadata');
+        if (claim.metadata.description) container.appendChild(addMeta('Description', claim.metadata.description));
+        if ("<%= info.LBRY_STATISTICS_LINK %>") container.appendChild(addLink('Blob Peers', "<%= info.LBRY_STATISTICS_LINK %>" + '/blob-peers?q=' + encodeURIComponent(claim.claim_name + ':' + claim.claim_id), "View Blob Peers"));
+        container.appendChild(addLink('URL', window.location, `lbry://${claim.claim_name}:${claim.claim_id}`));
+        if (claim.metadata.languages && claim.metadata.languages.length > 0) container.appendChild(addCategory('Languages', claim.metadata.languages, 'all_languages'));
+        if (claim.metadata.tags && claim.metadata.tags.length > 0) container.appendChild(addCategory('Tags', claim.metadata.tags, 'all_tags'));
+        if (claim.metadata.license) container.appendChild(addMeta('License', claim.metadata.license));
+    }
+
+    function addLink(title, link, content="") {
+        const meta = document.createElement('div');
+        meta.classList.add('meta');
+        const name = document.createElement('span');
+        name.classList.add('title');
+        name.innerText = title;
+        const text = document.createElement('a');
+        text.classList.add('text');
+        text.innerText = content || link;
+        text.href = link;
+
+        meta.appendChild(name);
+        meta.appendChild(text);
+        return meta
+    }
+
+    function addMeta(title, content) {
+        const meta = document.createElement('div');
+        meta.classList.add('meta');
+        const name = document.createElement('span');
+        name.classList.add('title');
+        name.innerText = title;
+        const text = document.createElement('span');
+        text.classList.add('text');
+        text.innerText = content;
+
+        meta.appendChild(name);
+        meta.appendChild(text);
+        return meta
+    }
+
+    function addCategory(title, values, type) {
+        const meta = document.createElement('div');
+        meta.classList.add('meta');
+        const name = document.createElement('span');
+        name.classList.add('title');
+        name.innerText = title;
+        const list = document.createElement('div');
+        list.classList.add('cat');
+
+        values.forEach(value=>{
+            const item = document.createElement('a');
+            item.classList.add('item');
+            //item.classList.add(value);
+            item.innerText = value;
+            item.href = `/$/search?${type}=["${value}"]`
+
+            list.appendChild(item);
+    
+        })
+
+        meta.appendChild(name);
+        meta.appendChild(list);
+        return meta;
+    }
+
+    async function handleRelated(claim) {
+        let params = {};
+        if (claim.metadata.tags && claim.metadata.tags.length > 0) params.any_tags = claim.metadata.tags;
+        if (claim.metadata.languages && claim.metadata.languages.length > 0) params.any_languages = claim.metadata.languages;
+        params.order_by = ["trending_global"];
+        params.page_size = 8;
+        params.no_totals = true;
+        params.not_tags = ["mature"];
+
+        populateFeed(await fetchRelated(params), document.querySelector('#related'));
+    }
+</script>

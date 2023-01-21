@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../head.ejs') %>
+    <link rel="stylesheet" href="/$/public/css/plyr.css" />
+    <script src="/$/public/js/plyr.polyfilled.js"></script>
+</head>
+<body>
+    <%- include('../header.ejs') %>
+    <div class="wrapper claim-view">
+        <div class="claim">
+            <div id="file"></div>
+            <div class="claim_info">
+                <span id="claim-title"></span>
+                <span id="claim-release"></span>
+            </div>
+            <div class="break"></div>
+            <div id="signing_channel">
+                <a id="channel-thumbnail-link" class="thumbnail"><img id="channel-thumbnail"></a>
+                <div class="name">
+                    <a id="channel-title"></a>
+                    <span id="channel-name"></span>
+                </div>
+            </div>
+            <div id="metadata"></div>
+        </div>
+        <div class="related">
+            <%- include('../feed.ejs', {type: "related", info}) %> 
+        </div>
+    </div>
+    <%- include('./script.ejs', { info }) %>
+</body>
+</html>

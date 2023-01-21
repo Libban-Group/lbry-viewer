@@ -1,0 +1,88 @@
+<script>
+    const getLocalStorage = <%- include('./getLocalStorage.js') %>;
+    const setLocalStorage = <%- include('./setLocalStorage.js') %>;
+    const activateNavButtons = <%- include('./activateNavButtons.js') %>;
+    const handleMarkdown = <%- include('./handleMarkdown.js') %>;
+    const toQuery = <%- include('./toQuery.js') %>;
+
+    let max_page;
+
+    function handleImage(thumbnail) {
+        // If the image is not present - just use the fallback image
+        if (!thumbnail || Object.keys(thumbnail).length === 0) return '/$/public/favicon.svg';
+
+        // Should we rewrite Speech images to use local streaming?
+        const useLocalStreaming = getLocalStorage('useLocalStreaming');
+        if (!useLocalStreaming) return thumbnail.url;
+
+        if (thumbnail.url.includes('https://spee.ch/')) {
+            let url = thumbnail.url.replace('https://spee.ch/', ''); // Remove Spee.ch from url
+            url = url.split('.')[0] // Remove the file extension from url
+            url = url.split('/') // Separate the claim_name and claim_name
+            if (url[0][0] === '@')  url = url[1]; // If the first item is a channel - we can't use the get route for it
+            else url = url[1] + ':' + url[0] // Put them back together in the correct syntax
+            url = "<%= info.LBRY_STREAMING_GET %>" + url // Create the link by adding the get url
+
+            return url;
+        } else if (thumbnail.url.includes('https://thumbs.spee.ch/view/')) {
+            let url = thumbnail.url.replace('https://thumbs.spee.ch/view/', ''); // Remove thumbs.spee.ch from url
+            url = url.split('.')[0]; // Remove the file extension from url
+            url = url.split('/'); // Separate the channel and claim_name
+            if (url[0][0] === '@')  url = url[1]; // If the first item is a channel - we can't use the get route for it
+            else url = url[1] + ':' + url[0] // Put them back together in the correct syntax
+            url = "<%= info.LBRY_STREAMING_GET %>" + url // Create the link by adding the get url
+
+            return url;
+        }
+
+        return thumbnail.url;
+    }
+
+    function handleTitle(title) {
+        if (title.length > 60) {
+            title = title.slice(0, 57) + '...'
+        }
+
+        return title;
+    }
+
+    function handleLBRYLink(link) {
+        if (!link) return;
+
+        link = link.replace('lbry:/', ''); // Remove lbry:// from link
+        link = link.replaceAll('#', ':'); // Using # is deprecated and has been replaced by :
+
+        return link;
+    }
+
+    function handleDate(date) {
+        date = new Date(date*1000).toLocaleString();
+        
+        return date;
+    }
+
+    function handleFollow(e, claim_id) {
+        let following = getLocalStorage('following') || [];
+
+        // If channel is currently followed
+        if (following.includes(claim_id)) {
+            e.target.innerText = "Follow";
+            following = following.filter((id)=>{ return id !== claim_id }); // Remove claim_id from array
+        } else { // If the channel is not currently followed
+            e.target.innerText = "Following";
+            following.push(claim_id); // Add claim_id to array
+        }
+
+        setLocalStorage('following', following); // Update following
+    }
+
+    function handleHoverFollow(e, type, claim_id) {
+        const following = getLocalStorage('following') || [];
+
+        // If channel is not currently followed
+        if (!following.includes(claim_id)) return;
+
+        if (type === 'mouseover') e.target.innerText = "Unfollow";
+        if (type === 'mouseout') e.target.innerText = "Following";
+    }
+</script>

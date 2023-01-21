@@ -1,0 +1,9 @@
+<div class="search_info">
+    <p  class="viewing_results">Viewing results for '<span id="viewing_results"></span>'</p>
+    <p class="claim_amount">Found <span id="claim_amount">x</span> claims</p>
+</div>
+<script>
+    const viewing_results = document.querySelector('#viewing_results');
+    let params = (new URL(document.location)).searchParams;
+    viewing_results.innerText = params.get('text');
+</script>

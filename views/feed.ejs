@@ -1,0 +1,249 @@
+<% if (type !== 'search' && type !== 'channel') { %>
+    <span class="feed-title"><%= type[0].toUpperCase() + type.substring(1) %></span>
+<% } else { %>
+    <span id="page_num">Page x of x</span>
+    <div class="nav">
+        <button id="back1">Back</button>
+        <button id="next1">Next</button>
+    </div>
+<% } %>
+<div class="feed">
+    <div class="items" id="<%= type %>"></div>
+    <% if (type !== 'search' && type !== 'channel') { %>
+       <a id="<%= type %>-more">Show more</a>
+    <% } %>
+</div>
+<% if (type === 'search' || type === 'channel') { %>
+    <!-- <span id="page_num">Page x of x</span> -->
+    <div class="nav">
+        <button id="back2">Back</button>
+        <button id="next2">Next</button>
+    </div>
+<% } %>
+
+<script>
+    (async ()=>{
+        const container = document.querySelector('#<%= type %>');
+        const feed = await fetchFeed();
+        if (!feed) return; // If the feed is empty - ignore
+        populateFeed(feed, container);
+    })();
+
+    async function fetchFeed() {
+        const type = "<%= type %>";
+
+        try {
+            if (type === 'recommended') return await fetchRecommended();
+            if (type === 'following') return await fetchFollowing();
+            if (type === 'search') {
+                activateNavButtons(fetchSearch, '<%= type %>');
+                return await fetchSearch();
+            }
+        } catch(err) {
+            console.log(err)
+        }
+    }
+
+    function checkInt(int) {
+        if (int) return parseInt(int);
+        return 1;
+    }
+
+    async function fetchRecommended() {
+        const tags = getLocalStorage('tags') || ["tech","education","science"];
+        const langs = getLocalStorage('langs') || ["en"];
+
+        const params = {
+            any_tags: tags,
+            any_languages: langs,
+            order_by: ["trending_mixed"],
+            page_size: 8,
+            no_totals: true
+        }
+
+        const resp  = await fetch('/$/api/search?' + toQuery(params));
+        const json = await resp.json();
+
+        let more_params = params;
+        more_params.page_size = 20;
+        more_params.no_totals = false;
+        document.querySelector('#<%= type %>-more').href = '/$/search?' + toQuery(more_params);
+
+        console.log(json);
+        return json;
+    }
+
+    async function fetchFollowing() {
+        const following = getLocalStorage('following');
+        if (!following || following.length === 0) return document.querySelector('#following-wrapper').style.display = 'none'; // No following
+
+        // Set show more link
+        document.querySelector('#<%= type %>-more').href = '/$/search?order_by=["release_time"]&channel_ids=' + JSON.stringify(following);
+
+        const resp  = await fetch('/$/api/search?page_size=10&order_by=["release_time"]&channel_ids=' + JSON.stringify(following));
+        const json = await resp.json();
+
+        console.log(json);
+        return json;
+    }
+
+    async function fetchSearch() {
+        const params = (new URL(document.location)).searchParams.toString();
+        //console.log(params);
+
+        const resp  = await fetch('/$/api/search?' + params);
+        const json = await resp.json();
+
+        // Update information
+        document.querySelector('#claim_amount').innerText = json.total_items;
+        document.querySelector('#page_num').innerText = `Page ${json.page} of ${json.total_pages}`;
+
+        console.log(json);
+        return json;
+    }
+
+    async function fetchRelated(params) {
+        const resp  = await fetch('/$/api/search?' + toQuery(params));
+        const json = await resp.json();
+
+        let more_params = params;
+        more_params.page_size = 20;
+        more_params.no_totals = false;
+        document.querySelector('#<%= type %>-more').href = '/$/search?' + toQuery(more_params);
+
+        console.log(json);
+        return json;
+    }
+
+    async function fetchChannelClaims(params) {
+        const page = (new URL(document.location)).searchParams.get('page');
+        if (page) params.page = parseInt(page);
+        const resp  = await fetch('/$/api/search?' + toQuery(params));
+        const json = await resp.json();
+
+        // Update information
+        document.querySelector('#page_num').innerText = `Page ${json.page} of ${json.total_pages}`;
+
+        console.log(json);
+        return json;
+    }
+
+    function populateFeed(feed, container) {
+        max_page = feed.total_pages;
+        /* TODO add support for type collection */
+        feed.items.forEach(item=>{
+            if (item.value_type === 'stream') return container.appendChild(createStreamElement(item));
+            if (item.value_type === 'channel') return container.appendChild(createChannelElement(item));
+        })
+    }
+
+    function createStreamElement(item) {
+        const stream_link = handleLBRYLink(item.canonical_url);
+        const channel_link = item.signing_channel ? handleLBRYLink(item.signing_channel.canonical_url) : '';
+
+        const stream = document.createElement('div');
+        stream.classList.add('stream');
+
+        // Set up stream thumbnail
+        const thumbnail = document.createElement('a');
+        thumbnail.classList.add('thumbnail');
+        thumbnail.href = stream_link;
+        const thumbnail_img = document.createElement('img');
+        thumbnail_img.src = handleImage(item.value.thumbnail);
+        thumbnail.appendChild(thumbnail_img);
+
+        // Set up stream title
+        const title = document.createElement('a');
+        title.classList.add('title');
+        title.innerText = handleTitle(item.value.title);
+        title.href = stream_link;
+
+        // Set up signing_channel
+        const signing_channel = document.createElement('div');
+        signing_channel.classList.add('signing_channel');
+
+        // Channel image
+        const channel_thumbnail = document.createElement('a');
+        channel_thumbnail.classList.add('channel_thumbnail');
+        channel_thumbnail.href = channel_link;
+        const channel_thumbnail_img = document.createElement('img');
+        channel_thumbnail_img.src = item.signing_channel && item.signing_channel.value ? handleImage(item.signing_channel.value.thumbnail) : '';
+        channel_thumbnail.appendChild(channel_thumbnail_img);
+
+        // Meta
+        const meta = document.createElement('div');
+        meta.classList.add('meta');
+
+        const channel_name = document.createElement('a');
+        channel_name.classList.add('channel_title');
+        channel_name.innerText = item.signing_channel && item.signing_channel.value ? item.signing_channel.value.title || item.signing_channel.name : 'Anonymous';
+        channel_name.href = channel_link;
+        meta.appendChild(channel_name);
+
+        const released = document.createElement('p');
+        released.classList.add('released');
+        released.innerText = handleDate(item.value.release_time);
+        meta.appendChild(released);
+
+        signing_channel.appendChild(channel_thumbnail);
+        signing_channel.appendChild(meta);
+
+        stream.appendChild(thumbnail);
+        stream.appendChild(title);
+        stream.appendChild(signing_channel);
+        return stream;
+    }
+
+    function createChannelElement(item) {
+        const following = getLocalStorage('following') || [];
+
+        const link = handleLBRYLink(item.canonical_url);
+
+        const channel = document.createElement('div');
+        channel.classList.add('channel');
+
+        // Set up channel thumbnail
+        const thumbnail = document.createElement('a');
+        thumbnail.classList.add('thumbnail');
+        thumbnail.href = link;
+
+        const thumbnail_img = document.createElement('img');
+        thumbnail_img.src = handleImage(item.value.thumbnail);
+
+        thumbnail.appendChild(thumbnail_img);
+
+        // Set up channel meta
+        const meta = document.createElement('div');
+        meta.classList.add('meta');
+        const title = document.createElement('a');
+        title.classList.add('title');
+        title.innerText = item.value.title || item.name;
+        title.href = link;
+
+        const follow = document.createElement('button');
+        follow.classList.add('follow');
+        follow.innerText = following && following.includes(item.claim_id) ? "Following" : "Follow";
+        follow.addEventListener('click', (e)=>{ handleFollow(e, item.claim_id) }); // Handle mouse click
+        follow.addEventListener('mouseover', (e)=>{ handleHoverFollow(e, 'mouseover', item.claim_id) }) // Handle mouse over
+        follow.addEventListener('mouseout', (e)=>{ handleHoverFollow(e, 'mouseout', item.claim_id) }) // Handle mouse out
+
+        const name = document.createElement('span');
+        name.classList.add('name');
+        name.innerText = item.name;
+
+        const claims = document.createElement('span');
+        claims.classList.add('claims');
+        claims.innerText = `${item.meta.claims_in_channel} claim${item.meta.claims_in_channel === 1 ? '': 's'}`;
+
+        meta.appendChild(title);
+        meta.appendChild(follow);
+        if (item.value.title) meta.appendChild(name);
+        meta.appendChild(claims);
+
+
+        channel.appendChild(thumbnail);
+        channel.appendChild(meta);
+        return channel;
+    }
+    
+</script>

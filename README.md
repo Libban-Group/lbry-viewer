@@ -1,31 +1,31 @@
 # LBRY Viewer
 
-A simple LBRY Viewer made with Node.js.
-View claims existing on the LBRY blockchain.
+A simple LBRY Viewer made with Bun.
+View content on the LBRY protocol.
 
 ## Prerequisites
 Requirements for running this
-* [Node.js](https://nodejs.org/)
-* [npm](https://www.npmjs.com/)
+* [Bun](https://bun.sh/)
+* [LBRY-SDK](https://github.com/lbryio/lbry-sdk)
 
 ## Installation
 ```sh
 git clone https://github.com/Pigges/lbry-viewer.git
 cd lbry-viewer
-npm i
+bun install
 cp .env.defaults .env
 ```
 
-Make sure to edit the .env file for your needs.
+> Make sure to edit the .env file for your needs.
 
 ## Run
 ```sh
-npm start
+bun start
 ```
 
 ## Development
 ```sh
-npm run dev
+bun run dev
 ```
 
 ## License

@@ -1,0 +1,666 @@
+/* Variables */
+:root {
+    --primary: #F9D75E;
+    --secondary: #4270D1;
+    --background: #292B2D;
+    --fade: rgba(0,0,0,0.2);
+    --radius: 10px;
+    --plyr-color-main: #F9D75E;
+    --plyr-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.break {
+    width: 100%;
+    height: 1px;
+    margin: 10px 0;
+    border-radius: var(--radius);
+    background-color: var(--primary);
+}
+
+a {
+    color: #fff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary);
+}
+
+html {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: var(--primary);
+    background-color: var(--background);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-height: 80px;
+    padding: 0 20px;
+    background-color: var(--fade);
+}
+
+header .brand {
+    display: flex;
+    align-items: center;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+header .brand svg {
+    width: 50px;
+}
+
+header .brand .title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+header .search {
+    display: flex;
+    padding: 10px 20px;
+    margin: 20px 10px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+}
+
+header input {
+    color: var(--primary);
+    width: 100%;
+    outline: none;
+    border: none;
+    background-color: transparent;
+}
+
+header input::placeholder {
+    color: var(--primary);
+    opacity: 0.70;
+}
+
+header button {
+    height: 100%;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+}
+
+@media screen and (max-width: 1000px) {
+    header .brand .title {
+        display: none;
+    }
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    width: 100%;
+}
+
+.wrapper .search_info .viewing_results {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+@media screen and (max-width: 700px) {
+    .wrapper {
+        margin: 10px;
+    }
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 5px;
+}
+
+.nav button {
+    font-size: 1rem;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+}
+
+#page_num {
+    padding-bottom: 20px;
+}
+
+.feed {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 300px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+}
+
+.feed-title {
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.feed .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.feed .items:empty::after{
+    font-size: 1.2rem;
+    content: "Resolving claims...";
+}
+
+.feed .stream, .feed .channel {
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+    transition: 0.2s;
+}
+
+.feed .channel {
+    border-radius: var(--radius);
+    background-color: var(--fade);
+}
+
+.feed .channel:hover .meta .title {
+    color: var(--primary);
+}
+
+.feed .channel .thumbnail {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 150px;
+    background-color: var(--fade);
+    border-radius: var(--radius);
+}
+
+.feed .channel .thumbnail img {
+    height: 100%;
+    border-radius: 1000%;
+}
+
+.feed .channel .meta {
+    text-align: center;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    height: fit-content;
+}
+
+.feed .channel .meta .title {
+    font-weight: bold;
+}
+
+.feed .channel .meta .follow {
+    font-weight: bold;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+    transition: 0.2s;
+}
+
+.feed .channel .meta .follow:hover {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.feed .stream:hover, .feed .channel:hover {
+    transform: scale(1.02);
+}
+
+.feed .stream .thumbnail {
+    display: flex;
+    width: 100%;
+    height: 169px;
+    justify-content: center;
+    border-radius: var(--radius);
+    background-color: black;
+    overflow: hidden;
+}
+
+.feed .stream .thumbnail img {
+    height: 100%;
+}
+
+.feed .stream .title {
+    color: #fff;
+    text-decoration: none;
+}
+
+.feed .stream:hover .title {
+    color: var(--primary);
+}
+
+.feed .stream .signing_channel {
+    display: flex;
+    width: 100%;
+    margin-top: auto;
+}
+
+.feed .stream .signing_channel .channel_thumbnail {
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    border-radius: var(--radius);
+}
+
+.feed .stream .signing_channel .channel_thumbnail img {
+    width: 100%;
+    height: 100%;
+}
+
+.feed .stream .signing_channel .meta {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.75rem;
+    margin-left: 5px;
+    opacity: 0.8;
+}
+
+/* Claim page */
+
+.claim-view {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.claim-view .claim {
+    width: 100%;
+    max-width: 1280px;
+}
+
+.claim-view .claim #file {
+    display: flex;
+    width: 100%;
+    height: fit-content;
+    max-width: 1280px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+    overflow: hidden;
+}
+
+.claim-view .claim #file .hint {
+    padding: 20px;
+}
+
+.claim-view .claim #file:empty::after{
+    font-size: 1rem;
+    padding: 20px;
+    content: "Resolving claim...";
+}
+
+.claim-view .claim #file .stream {
+    width: 100%;
+    height: 100%;
+}
+.claim-view .claim #file .img {
+    display: flex;
+    margin: auto;
+    max-height: 720px;
+}
+
+.claim-view .claim #file .plyr {
+    width: 100%;
+    max-height: 720px;
+}
+
+.claim-view .claim #file object.stream {
+    width: 100%;
+    height: 720px;
+}
+
+.claim-view .claim #file .markdown {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 20px;
+}
+
+.claim-view .claim #file .markdown img {
+    display: flex;
+    margin: auto;
+    max-width: 500px;
+    border-radius: var(--radius);
+}
+
+.claim-view .claim_info {
+    display: flex;
+    flex-direction: column;
+}
+
+.claim-view .claim_info #claim-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding-top: 10px;
+}
+
+.claim-view .claim_info #claim-release {
+    font-size: 1rem;
+    color: #fff;
+}
+
+.claim-view #signing_channel {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.claim-view #signing_channel .thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 75px;
+    height: 75px;
+    overflow: hidden;
+    background-color: var(--fade);
+    border-radius: 100px;
+}
+
+.claim-view #signing_channel .thumbnail img {
+    width: 100%;
+}
+
+.claim-view #signing_channel .name {
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+}
+
+.claim-view #signing_channel .name #channel-title {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.claim-view #signing_channel .follow {
+    align-self: center;
+    font-weight: bold;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    height: fit-content;
+    padding: 15px 30px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+    transition: 0.2s;
+}
+
+.claim-view #signing_channel .follow:hover {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.claim-view #metadata {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 20px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+}
+
+.claim-view #metadata .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.claim-view #metadata .meta .title {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.claim-view #metadata .meta .text {
+    color: #fff;
+    /* font-size: 0.75rem; */
+    overflow-wrap: break-word;
+}
+
+.claim-view #metadata .meta a.text:hover {
+    color: var(--primary);
+}
+
+.claim-view #metadata .meta .cat {
+    height: fit-content;
+    margin: 5px;
+}
+
+.claim-view #metadata .meta .item {
+    height: fit-content;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+}
+
+.claim-view #metadata .meta .text.Description {
+    font-size: 1rem;
+}
+
+.claim-view .related {
+    /* width: 340px; */
+}
+
+.claim-view .feed {
+    width: 340px;
+}
+
+@media screen and (max-width: 1000px) {
+    .claim-view {
+        flex-direction: column;
+    }
+    .claim-view .feed {
+        width: initial;
+    }
+}
+
+
+/* Channel Page */
+
+.channel-head {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 100%;
+    max-width: 1500px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background-color: var(--fade);
+    margin-bottom: 20px;
+}
+
+.channel-head .banner {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+}
+
+.channel-head .banner .cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--fade);
+}
+
+.channel-head .banner .cover img {
+    width: 100%;
+}
+
+.channel-head .banner .info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.channel-head .banner .info .thumbnail {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 200px;
+    border-radius: 100px;
+    background-color: var(--fade);
+    overflow: hidden;
+}
+
+.channel-head .banner .info .thumbnail img {
+    height: 100%;
+}
+
+.channel-head .banner .info .text {
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    height: fit-content;
+    padding: 10px;
+    border-radius: var(--radius);
+    background-color: rgba(0,0,0,0.8);
+}
+
+.channel-head .banner .info .text #title {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.channel-head .banner .info .text #name {
+    font-size: 1.25rem;
+}
+
+.channel-head .banner .info .text #claims {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.channel-head .banner #follow {
+    align-self: center;
+    /* font-weight: bold; */
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    height: fit-content;
+    padding: 15px 30px;
+    border-radius: var(--radius);
+    background-color: rgba(0,0,0,0.5);
+    transition: 0.2s;
+}
+.channel-head .banner #follow:hover {
+    font-weight: bold;
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.channel-head .pages {
+    display: flex;
+    /* gap: 5px; */
+    height: 50px;
+}
+
+.channel-head .pages button {
+    color: #fff;
+    font-size: 1.25rem;
+    height: 100%;
+    border: none;
+    cursor: pointer;
+    padding: 0 10px;
+    /* border-radius: var(--radius); */
+    background-color: var(--fade);
+}
+
+#channel-claims {
+    margin: auto;
+    width: 100%;
+    max-width: 1500px;
+}
+
+#channel-about {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 100%;
+    max-width: 1500px;
+    padding: 20px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+}
+
+#channel-about .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#channel-about .meta .title {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+#channel-about .meta .text {
+    color: #fff;
+    /* font-size: 0.75rem; */
+    overflow-wrap: break-word;
+}
+
+#channel-about .meta a.text:hover {
+    color: var(--primary);
+}
+
+#channel-about .meta .cat {
+    height: fit-content;
+    margin: 5px;
+}
+
+#channel-about .meta .item {
+    height: fit-content;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: var(--radius);
+    background-color: var(--fade);
+}
+
+#channel-about .meta .text.Description {
+    font-size: 1rem;
+}
