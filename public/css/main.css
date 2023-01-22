@@ -217,8 +217,10 @@ header button {
 }
 
 .feed .channel .thumbnail img {
+    width: 150px;
     height: 100%;
     border-radius: 1000%;
+    background-color: var(--fade);
 }
 
 .feed .channel .meta {
