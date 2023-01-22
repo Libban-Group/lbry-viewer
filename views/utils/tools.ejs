@@ -19,6 +19,7 @@
             let url = thumbnail.url.replace('https://spee.ch/', ''); // Remove Spee.ch from url
             url = url.split('.')[0] // Remove the file extension from url
             url = url.split('/') // Separate the claim_name and claim_name
+            if (url.length === 1) return "<%= info.LBRY_STREAMING_GET %>" + url[0]; // If the format is - spee.ch/claim_name:claim_id
             if (url[0][0] === '@')  url = url[1]; // If the first item is a channel - we can't use the get route for it
             else url = url[1] + ':' + url[0] // Put them back together in the correct syntax
             url = "<%= info.LBRY_STREAMING_GET %>" + url // Create the link by adding the get url
