@@ -6,6 +6,7 @@ const claimBlockList = loadJSON('/data/blockedClaims.json') || [];
 export default function(claims, action) {
     if (action === "notice") return notice(claims);
     if (action === "remove") return remove(claims);
+    if (action === "pop") return pop(claims);
     return claims;
 }
 
@@ -34,4 +35,17 @@ function remove(claim) {
         };
     }
     return claim;
+}
+
+function pop(claims) {
+    const blocked = Object.keys(claims).filter(claim => {
+        if (claimBlockList.includes(claims[claim].claim_id)) return claim;
+        if (!claims[claim].signing_channel) return; // Skip if the claim is not associated with a channel
+        if (channelBlockList.includes(claims[claim].signing_channel.claim_id)) return claim;
+    });
+    blocked.forEach(i=>{
+        claims[i] = {};
+    });
+
+    return claims;
 }

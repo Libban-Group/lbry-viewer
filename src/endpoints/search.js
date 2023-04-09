@@ -1,6 +1,7 @@
 import LBRY from '../utils/LBRY.js';
 import { checkJSON, checkInt, checkFloat, checkBoolean} from '../utils/checkTypes.js';
 import loadJSON from '../utils/loadJSON.js';
+import checkBlockList from '../utils/checkBlockList.js';
 
 const channelBlockList = loadJSON('/data/blockedChannels.json') || [];
 const claimBlockList = loadJSON('/data/blockedChannels.json') || [];
@@ -21,6 +22,9 @@ export default async (ctx)=>{
 
     // If LBRY SDK error - just return the error
     if (resp.error) return ctx.sendJson(resp);
+
+    // Check block list
+    resp.result.items = checkBlockList(resp.result.items, "pop");
 
     const res = {
         items: resp.result.items,
