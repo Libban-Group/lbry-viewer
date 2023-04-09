@@ -7,6 +7,7 @@
         handleFollowButton(channel_claim);
         handleClaims(channel_claim);
         handleAbout(channel_claim);
+        handleNotice(channel_claim);
     })();
 
     async function fetchChannel() {
@@ -154,5 +155,19 @@
             if (view !== 'claims') document.querySelector('#channel-claims').style.display = 'none';
             if (view !== 'about') document.querySelector('#channel-about').style.display = 'none';
         };
+    }
+
+    function handleNotice(claim) {
+        const n = document.querySelector('#notice');
+
+        if (claim.notice) {
+            const message = document.createElement('p');
+            message.innerText = claim.notice;
+            const link = document.createElement('a');
+            link.innerText = "Learn more";
+            link.href = claim.notice_link
+            n.appendChild(message);
+            n.appendChild(link);
+        }
     }
 </script>

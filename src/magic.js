@@ -3,7 +3,8 @@ import render from './utils/render.js';
 import api from './api.js';
 
 const pages = [
-    "search"
+    "search",
+    "tos"
 ]
 
 export default async (ctx)=>{

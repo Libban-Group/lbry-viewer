@@ -1,5 +1,7 @@
 import LBRY from '../utils/LBRY.js';
-import { checkJSON, checkInt, checkFloat, checkBoolean} from '../utils/checkTypes.js'
+import { checkJSON, checkInt, checkFloat, checkBoolean} from '../utils/checkTypes.js';
+
+const channelBlockList = JSON.parse(process.env.BLOCKED_CHANNELS || "[]");
 
 export default async (ctx)=>{
     let params = Object.fromEntries(ctx.query);
@@ -16,6 +18,9 @@ export default async (ctx)=>{
     // If LBRY SDK error - just return the error
     if (resp.error) return ctx.sendJson(resp);
 
+    // Check channel block list
+    //resp.result.items = checkChannelBlockList(resp.result.items);
+
     const res = {
         items: resp.result.items,
         page: resp.result.page,
@@ -25,6 +30,20 @@ export default async (ctx)=>{
 
     return ctx.sendJson(res);
 }
+
+/*function checkChannelBlockList(items) {
+    const blocked = Object.keys(items).filter(claim => {
+        if (!items[claim].signing_channel) return; // Skip if the claim is not associated with a channel
+
+        console.log(items[claim].signing_channel.claim_id);
+
+        if (channelBlockList.includes(items[claim].signing_channel.claim_id)) return claim;
+    });
+    blocked.forEach(i=>{
+        items.pop(i);
+    });
+    return items;
+}*/
 
 function options(query) {
     // Source: https://lbry.tech/api/sdk#claim_search
@@ -37,7 +56,7 @@ function options(query) {
         nout: query.nout,
         channel: query.channel,
         channel_ids: checkJSON(query.channel_ids),
-        not_channel_ids: checkJSON(query.not_channel_ids),
+        not_channel_ids: channelBlockList.concat(checkJSON(query.not_channel_ids)),
         has_channel_signature: checkBoolean(query.has_channel_signature),
         valid_channel_signature: checkBoolean(query.valid_channel_signature),
         invalid_channel_signature: checkBoolean(query.invalid_channel_signature),

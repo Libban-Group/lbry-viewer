@@ -1,7 +1,7 @@
 <script>
     (async ()=>{
         const claim = await fetchClaim();
-        console.log(claim);
+        if (handleNotice(claim)) return; // Check for notice
         handleFile(claim);
         handleChannelInfo(claim);
         handleClaimInfo(claim);
@@ -226,5 +226,20 @@
         params.not_tags = ["mature"];
 
         populateFeed(await fetchRelated(params), document.querySelector('#related'));
+    }
+
+    function handleNotice(claim) {
+        const n = document.querySelector('#notice');
+
+        if (claim.notice) {
+            const message = document.createElement('p');
+            message.innerText = claim.notice;
+            const link = document.createElement('a');
+            link.innerText = "Learn more";
+            link.href = claim.notice_link
+            n.appendChild(message);
+            n.appendChild(link);
+            return true;
+        }
     }
 </script>

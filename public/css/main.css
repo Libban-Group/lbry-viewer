@@ -688,3 +688,15 @@ header button {
 #channel-about .meta .text.Description {
     font-size: 1rem;
 }
+
+#notice:not(:empty) {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 100%;
+    max-width: 1500px;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    background-color: rgba(255,0,0,0.1);
+}
