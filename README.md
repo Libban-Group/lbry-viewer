@@ -18,6 +18,12 @@ cp .env.defaults .env
 
 > Make sure to edit the .env file for your needs.
 
+## Block lists
+These are .json files containing an array that should be located in a directory called data.
+* ./data/blockedChannels.json
+* ./data/blockedClaims.json
+* ./data/blockedTags.json
+
 ## Run
 ```sh
 bun start
