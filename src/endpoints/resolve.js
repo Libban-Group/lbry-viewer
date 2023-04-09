@@ -1,7 +1,6 @@
 import LBRY from '../utils/LBRY.js';
 import { checkJSON, checkInt, checkFloat, checkBoolean} from '../utils/checkTypes.js';
-
-const channelBlockList = JSON.parse(process.env.BLOCKED_CHANNELS || "[]");
+import checkBlockList from '../utils/checkBlockList.js';
 
 export default async (ctx)=>{
     let params = Object.fromEntries(ctx.query);
@@ -21,23 +20,17 @@ export default async (ctx)=>{
     //console.log(resp.result);
 
     // Check channel block list
-    resp.result = checkChannelBlockList(resp.result);
+    //resp.result = checkChannelBlockList(resp.result);
+
+    // Check block list
+    resp.result = checkBlockList(Object.values(resp.result), "notice");
 
     const res = {
-        claims: Object.values(resp.result), 
+        claims: resp.result, 
     }
 
 
     return ctx.sendJson(res);
-}
-
-function checkChannelBlockList(res) {
-    const blocked = Object.keys(res).filter(claim => channelBlockList.includes(res[claim].claim_id));
-    blocked.forEach(claim=>{
-        res[claim].notice = "This channel has been blocked as it violates our ToS (Terms of Service).";
-        res[claim].notice_link = "/$/tos"
-    });
-    return res;
 }
 
 function options(query) {

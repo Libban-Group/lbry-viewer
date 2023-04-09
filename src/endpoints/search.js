@@ -1,7 +1,10 @@
 import LBRY from '../utils/LBRY.js';
 import { checkJSON, checkInt, checkFloat, checkBoolean} from '../utils/checkTypes.js';
+import loadJSON from '../utils/loadJSON.js';
 
-const channelBlockList = JSON.parse(process.env.BLOCKED_CHANNELS || "[]");
+const channelBlockList = loadJSON('/data/blockedChannels.json') || [];
+const claimBlockList = loadJSON('/data/blockedChannels.json') || [];
+const tagBlockList = loadJSON('/data/blockedTags.json') || [];
 
 export default async (ctx)=>{
     let params = Object.fromEntries(ctx.query);
@@ -9,7 +12,8 @@ export default async (ctx)=>{
     // Try parse the query
     try {
         params = options(params);
-    } catch {
+    } catch(err) {
+        console.log(err);
         return ctx.sendJson({ error: "Failed to parse params" });
     }
 
@@ -17,9 +21,6 @@ export default async (ctx)=>{
 
     // If LBRY SDK error - just return the error
     if (resp.error) return ctx.sendJson(resp);
-
-    // Check channel block list
-    //resp.result.items = checkChannelBlockList(resp.result.items);
 
     const res = {
         items: resp.result.items,
@@ -30,20 +31,6 @@ export default async (ctx)=>{
 
     return ctx.sendJson(res);
 }
-
-/*function checkChannelBlockList(items) {
-    const blocked = Object.keys(items).filter(claim => {
-        if (!items[claim].signing_channel) return; // Skip if the claim is not associated with a channel
-
-        console.log(items[claim].signing_channel.claim_id);
-
-        if (channelBlockList.includes(items[claim].signing_channel.claim_id)) return claim;
-    });
-    blocked.forEach(i=>{
-        items.pop(i);
-    });
-    return items;
-}*/
 
 function options(query) {
     // Source: https://lbry.tech/api/sdk#claim_search
@@ -83,7 +70,7 @@ function options(query) {
         duration: checkInt(query.duration),
         any_tags: checkJSON(query.any_tags),
         all_tags: checkJSON(query.all_tags),
-        not_tags: checkJSON(query.not_tags),
+        not_tags: tagBlockList.concat(checkJSON(query.not_tags)),
         any_languages: checkJSON(query.any_languages),
         all_languages: checkJSON(query.all_languages),
         not_languages: checkJSON(query.not_languages),
